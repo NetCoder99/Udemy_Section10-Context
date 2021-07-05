@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useReducer } from 'react';
+import React, { useEffect, useState, useReducer, useContext } from 'react';
+import AuthContext from '../../store/auth-context';
+
 import {emailReducerFnc}    from './Login.validate';
 import {passwordReducerFnc} from './Login.validate';
 
@@ -7,46 +9,40 @@ import classes from './Login.module.css';
 import Button from '../UI/Button/Button';
 
 const Login = (props) => {
-  const [formIsValid, setFormIsValid] = useState(false);
+  const ctx = useContext(AuthContext);
+
+  const [formIsValid,   setFormIsValid] = useState(false);
   const [emailState,    dispatchEmail]    = useReducer(emailReducerFnc,    {value: '', isValid: false});
   const [passwordState, dispatchPassword] = useReducer(passwordReducerFnc, {value: '', isValid: false});
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-  const { isValid: isValidEmail}     = emailState;
+  //const { isValid: isValidEmail}     = emailState;
   const { isValid: isValidPassword}  = passwordState;
   useEffect(() => {
     const timerId = setTimeout(() => {
       console.log('Login:useEffect:setTimeout');
       setFormIsValid(
-        isValidEmail && isValidPassword
+        emailState.isValid && isValidPassword
       );
     }, 500);
     return () => {
       console.log('Login:useEffect:cleanup');
       clearTimeout(timerId);
     };
-  }, [isValidEmail, isValidPassword])
+  }, [emailState.isValid, isValidPassword])
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   const emailChangeHandler = (event) => {
     dispatchEmail({ type: 'USER_INPUT', val: event.target.value });
   };
-  //const passwordChangeHandler = (event) => {
-  //  dispatchPassword({ type: 'USER_INPUT', val: event.target.value })
-  //};
-
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   const validateEmailHandler = () => {
     dispatchEmail({ type: 'INPUT_BLUR' });
   };
-  //const validatePasswordHandler = () => {
-  //  dispatchPassword({ type: 'INPUT_BLUR'});
-  //};
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   const submitHandler = (event) => {
     event.preventDefault();
-    props.onLogin(emailState.value, passwordState.value);
+    ctx.onLogin(emailState.value, passwordState.value);
   };
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
