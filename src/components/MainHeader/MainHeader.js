@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import AuthContext from '../../store/auth-context';
+import AuthContext from '../../store/AuthContextProvider';
 
 import Navigation from './Navigation';
 import classes from './MainHeader.module.css';
