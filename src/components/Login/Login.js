@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer, useContext } from 'react';
+import React, { useEffect, useState, useReducer, useContext, useRef } from 'react';
 import AuthContext from '../../store/AuthContextProvider';
 
 import {emailReducerFnc}    from './Login.validate';
@@ -16,20 +16,21 @@ const Login = (props) => {
   const [emailState,    dispatchEmail]    = useReducer(emailReducerFnc,    {value: '', isValid: false});
   const [passwordState, dispatchPassword] = useReducer(passwordReducerFnc, {value: '', isValid: false});
 
+  const emailInputRef = useRef();  
+  const passwordInputRef = useRef();  
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-  const { isValid: isValidPassword}  = passwordState;
   useEffect(() => {
     const timerId = setTimeout(() => {
       console.log('Login:useEffect:setTimeout');
       setFormIsValid(
-        emailState.isValid && isValidPassword
+        emailState.isValid && passwordState.isValid
       );
     }, 500);
     return () => {
       console.log('Login:useEffect:cleanup');
       clearTimeout(timerId);
     };
-  }, [emailState.isValid, isValidPassword])
+  }, [emailState.isValid, passwordState.isValid])
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   const emailChangeHandler = (event) => {
@@ -51,10 +52,17 @@ const Login = (props) => {
   const submitHandler = (event) => {
     console.log('Login:submitHandler');
     event.preventDefault();
-    ctx.onLogin(emailState.value, passwordState.value);
+    if (formIsValid)
+    {ctx.onLogin(emailState.value, passwordState.value);}
+    else if (!emailState.isValid) 
+    {emailInputRef.current.focus();}
+    else if (!passwordState.isValid) 
+    {passwordInputRef.current.focus();}
   };
 
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   const emailInputProps = {
+    ref: emailInputRef,
     id : "email",
     type: "Email",
     text: "E-Mail Address",
@@ -65,6 +73,7 @@ const Login = (props) => {
   };
 
   const passwordInputProps = {
+    ref: passwordInputRef,
     id : "password",
     type: "password",
     text: "Password",
@@ -80,31 +89,8 @@ const Login = (props) => {
       <form onSubmit={submitHandler}>
         <Input {...emailInputProps} />
         <Input {...passwordInputProps} />
-
-        {/* <div className={`${classes.control} ${emailState.isValid === false ? classes.invalid : ''}`}>
-          <label htmlFor="email">E-Mail</label>
-          <input
-            type="email"
-            id="email"
-            value={emailState.value}
-            onChange={emailChangeHandler}
-            onBlur={validateEmailHandler}
-          />
-        </div> */}
-
-        {/* <div className={`${classes.control} ${passwordState.isValid === false ? classes.invalid : ''}`}>
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={dispatchPassword.value}
-            onChange={event => dispatchPassword({ type: 'USER_INPUT', val: event.target.value })}
-            onBlur={() => dispatchPassword({ type: 'INPUT_BLUR'})}
-          />
-        </div> */}
-
         <div className={classes.actions}>
-          <Button type="submit" className={classes.btn} disabled={!formIsValid}>
+          <Button type="submit" className={classes.btn} >
             Login
           </Button>
         </div>
